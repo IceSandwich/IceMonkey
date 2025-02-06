@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    Refreshing proxy...
+</body>
+<script>
+    let bs = null;
+
+    function setupBS() {
+        const packet = bs.socket.io._callbacks["$packet"];
+        packet.unshift(function (t) {
+            // console.log("Receive packet: ", t);
+
+            if (t.data === undefined) return;
+            window.parent.postMessage({ packet: t.data }, "*");
+            // console.log("Send packet to parent");
+        });
+
+        window.parent.postMessage({
+            initialized: null
+        }, "*");
+    }
+
+    let getBrowserSyncInterval = setInterval(function () {
+        if (window.___browserSync___ === undefined) {
+            return;
+        }
+
+        bs = window.___browserSync___;
+        clearInterval(getBrowserSyncInterval);
+
+        // console.log("Got bs object!");
+        setupBS();
+    }, 600);
+</script>
+</html>
